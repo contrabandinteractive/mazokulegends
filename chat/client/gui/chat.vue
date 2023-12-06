@@ -15,12 +15,20 @@
 
 <script>
 const GUI_CONTROLS = 'rpg-controls'
+import { useMetaMaskWallet } from "vue-connect-wallet";
 import Web3 from 'web3';
 const web3 = new Web3(window.ethereum);
 //import MyContract from './contract.json';
 let theNumOfSwords; 
 
 
+
+
+
+
+
+
+// Contract ABI
 const contractABI = [
 	{
 		"inputs": [],
@@ -528,6 +536,28 @@ const contractABI = [
 ];
 
 
+
+const contract = new web3.eth.Contract(contractABI, '0x8FA30Ac6e52D48829B9Bd19A65a27da81C3B3666');
+
+// Check if user has minted already
+async function hasUserMintedSword(checkThis) {
+  try {
+      const minted = await contract.methods.hasMintedSword(checkThis).call();
+      return minted;
+  } catch (error) {
+      console.error("Error checking if user has minted a sword:", error);
+      return false;
+  }
+}
+
+let firstAccount;
+let hasMinted;
+
+
+
+
+
+
 export default {
     name: 'rpg-chat',
     inject: ['rpgEngine', 'rpgGui', 'rpgSocket'],
@@ -540,13 +570,107 @@ export default {
     mounted() {
         const socket = this.rpgSocket();
         socket.on('chat-message', ({ message, type }) => {
-            this.messages.push({
-                message,
-                type
-            })
-            const el = this.$refs['chat-list']
-            el.scrollTop = el.scrollHeight + 100
+			
+			if(message.includes('send xrp') || message.includes('send XRP')){
+				let theAmount = prompt("How much XRP do you want to send?");
+				let theRecipient = prompt("To which wallet address?");
+				const wallet = useMetaMaskWallet();
+				wallet.getAccounts()
+				.then(accounts => {
+					if (Array.isArray(accounts) && accounts.length > 0) {
+					// Get the first account
+					firstAccount = accounts[0];
+
+					const tx = {
+						//from: firstAccount,
+						//to: theRecipient,
+						from: firstAccount,
+						to: theRecipient.toString(),
+						value: web3.utils.toWei(theAmount.toString(), 'ether'),
+						gas: 2000000,
+						gasPrice: web3.utils.toWei('10', 'gwei')
+					};
+
+					console.log(tx);
+
+					web3.eth.sendTransaction(tx)
+					.on('transactionHash', hash => console.log(`Transaction hash: ${hash}`))
+					.on('receipt', receipt => console.log(`Receipt: ${receipt}`))
+					.on('error', error => console.error(`Error: ${error}`));
+
+					
+					}
+				})
+
+				
+
+			}else{
+				this.messages.push({
+					message,
+					type
+				})
+				const el = this.$refs['chat-list']
+				el.scrollTop = el.scrollHeight + 100
+			}
         });
+
+
+
+		// Begin initWeb3 block
+		// Connect MetaMask
+		console.log('Connecting to MetaMask...');
+		const wallet = useMetaMaskWallet();
+		wallet.connect();
+		wallet.getAccounts()
+		.then(accounts => {
+			if (Array.isArray(accounts) && accounts.length > 0) {
+			// Get the first account
+			firstAccount = accounts[0];
+			console.log("First connected account:", firstAccount);
+			//firstAccount = 'test';
+			//console.log('Passing to server.');
+			socket.emit('walletAddress', { firstAccount })
+
+			hasUserMintedSword(firstAccount).then((minted) => {
+				if (minted) {
+					console.log("User has minted a sword.");
+					hasMinted=true;
+					// Need to update server here!
+					//
+					socket.emit('setMintedStatus', { value:true })
+
+				} else {
+					console.log("User has not minted a sword.");
+				}
+			});
+
+
+			} else {
+			// Handle the case where no accounts are connected or an error occurred
+				console.log("No connected accounts or an error occurred:", accounts);
+				alert('Please connect to MetaMask first and make sure you have an account on the XRPL sidechain!');
+				alert('After you connect, RELOAD this page.');
+				socket.emit('notConnected', { notConnected:true })
+				wallet.connect();
+			}
+		})
+		.catch(error => {
+			// Handle any errors that occur during the execution of getAccounts()
+			console.error("Error fetching accounts:", error);
+		});
+
+		
+		// End initWeb3 block
+
+
+
+
+
+
+
+
+
+
         // Listen for sendMoney event
         this.rpgSocket().on('sendMoney', (data) => {
            console.log('Sending XRP...'); 
@@ -557,7 +681,7 @@ export default {
                 from: data.sendFrom,
                 to: '0xD8Ea779b8FFC1096CA422D40588C4c0641709890',
                 //value: web3.utils.toWei(data.amount, 'ether'),
-                value: web3.utils.toWei('0.01', 'ether'),
+                value: web3.utils.toWei(data.amount.toString(), 'ether'),
                 gas: 2000000,
                 gasPrice: web3.utils.toWei('10', 'gwei')
             };
@@ -572,7 +696,7 @@ export default {
 
 
       this.rpgSocket().on('getNumOfSwordsMinted', (data) => {
-        const contract = new web3.eth.Contract(contractABI, '0x6Dd3d40aEF62C15e02A442a512626c17dD58036d');
+        const contract = new web3.eth.Contract(contractABI, '0x8FA30Ac6e52D48829B9Bd19A65a27da81C3B3666');
 
         
 
@@ -596,7 +720,7 @@ export default {
        });
 
        this.rpgSocket().on('mintSword', (data) => {
-        const contract = new web3.eth.Contract(contractABI, '0x6Dd3d40aEF62C15e02A442a512626c17dD58036d');
+        const contract = new web3.eth.Contract(contractABI, '0x8FA30Ac6e52D48829B9Bd19A65a27da81C3B3666');
 
 
         // See how many swords were minted
@@ -610,7 +734,7 @@ export default {
 
         const tx = {
                 from: data.sendFrom,
-                value: web3.utils.toWei('0.001', 'ether'),
+                value: web3.utils.toWei('5', 'ether'),
                 gas: 2000000,
                 gasPrice: web3.utils.toWei('10', 'gwei')
         };

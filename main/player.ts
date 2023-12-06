@@ -10,14 +10,18 @@ const player: RpgPlayerHooks = {
     */
     async onConnected(player: RpgPlayer){
         //Update player name with wallet address
+        
         player.on('walletAddress',(message) => {
+            console.log('Updating wallet address!');
             player.setVariable('defaultWallet', message.firstAccount);
-            player.name = ''
             console.log(truncateEthAddress(message.firstAccount));
             //player.name = message.firstAccount;
             player.name = truncateEthAddress(message.firstAccount);
-            player.setComponentsTop(Components.text('{name}'))
+            console.log('player is '+message.firstAccount);
+            //player.setComponentsTop(Components.text('hey'))
+            player.setComponentsTop(Components.text(player.name))
         });
+        
 
         player.on('updateNumOfSwords',(message) => {
             console.log(message);
@@ -37,6 +41,12 @@ const player: RpgPlayerHooks = {
         player.on('setMintedStatus',(message) => {
             player.setVariable('hasSword', true);
             console.log('Player now has a sword!');
+            //player.setComponentsTop(Components.text('{name}'))
+            
+        });
+
+        player.on('notConnected',(message) => {
+            player.setVariable('notConnected', true);
             
         });
         console.log('Now connected');
@@ -55,6 +65,8 @@ const player: RpgPlayerHooks = {
         await player.showText('You will win or lose XRP depending on the outcome of battles.')
         await player.showText('P.S. thanks for checking out my NEW HORIZON hackathon submission! -Mark')
         player.setVariable('AFTER_INTRO', true)
+        console.log(player.name + ' has logged on.');
+        player.setComponentsTop(Components.text(player.name))
     }
 }
 

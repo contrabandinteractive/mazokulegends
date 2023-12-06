@@ -4,6 +4,9 @@ import chatGui from './gui/chat.vue'
 import { sceneMap } from './map'
 import { useMetaMaskWallet } from "vue-connect-wallet";
 import Web3 from 'web3';
+//import io from 'socket.io-client';
+
+//const socket = io('http://localhost:8000');
 const web3 = new Web3(window.ethereum);
 
 // Contract ABI
@@ -513,7 +516,7 @@ const contractABI = [
 	}
 ] as const;
 
-const contract = new web3.eth.Contract(contractABI, '0x6Dd3d40aEF62C15e02A442a512626c17dD58036d');
+const contract = new web3.eth.Contract(contractABI, '0x8FA30Ac6e52D48829B9Bd19A65a27da81C3B3666');
 
 // Check if user has minted already
 async function hasUserMintedSword(checkThis) {
@@ -526,42 +529,50 @@ async function hasUserMintedSword(checkThis) {
   }
 }
 
-var hasMinted;
-// Connect MetaMask
-console.log('Connecting to MetaMask...');
-const wallet = useMetaMaskWallet();
-wallet.connect();
 let firstAccount;
-wallet.getAccounts()
-  .then(accounts => {
-    if (Array.isArray(accounts) && accounts.length > 0) {
-      // Get the first account
-      firstAccount = accounts[0];
-      console.log("First connected account:", firstAccount);
+let hasMinted;
 
-      hasUserMintedSword(firstAccount).then((minted) => {
-        if (minted) {
-            console.log("User has minted a sword.");
-            hasMinted=true;
-        } else {
-            console.log("User has not minted a sword.");
-        }
-      });
+function initWeb3(){
+	
+		// Connect MetaMask
+		console.log('Connecting to MetaMask...');
+		const wallet = useMetaMaskWallet();
+		wallet.connect();
+		wallet.getAccounts()
+		.then(accounts => {
+			if (Array.isArray(accounts) && accounts.length > 0) {
+			// Get the first account
+			firstAccount = accounts[0];
+			console.log("First connected account:", firstAccount);
+
+			hasUserMintedSword(firstAccount).then((minted) => {
+				if (minted) {
+					console.log("User has minted a sword.");
+					hasMinted=true;
+					// Need to update server here!
+					//
+					
+
+				} else {
+					console.log("User has not minted a sword.");
+				}
+			});
 
 
-    } else {
-      // Handle the case where no accounts are connected or an error occurred
-      console.log("No connected accounts or an error occurred:", accounts);
-    }
-  })
-  .catch(error => {
-    // Handle any errors that occur during the execution of getAccounts()
-    console.error("Error fetching accounts:", error);
-});
+			} else {
+			// Handle the case where no accounts are connected or an error occurred
+			console.log("No connected accounts or an error occurred:", accounts);
+			}
+		})
+		.catch(error => {
+			// Handle any errors that occur during the execution of getAccounts()
+			console.error("Error fetching accounts:", error);
+		});
+	
+}
 
 
-
-
+//initWeb3();
 
 
 @RpgModule<RpgClient>({ 
@@ -573,16 +584,29 @@ wallet.getAccounts()
         chatGui
     ],
     engine: {
+        onStart(engine: RpgClientEngine){
+          //initWeb3()
+        },
         onConnected(engine: RpgClientEngine, socket: any) {
-            socket.emit('walletAddress', { firstAccount })
-            console.log('Passing to server.');
-            if(hasMinted){
-              console.log('Has Minted!');
-              socket.emit('setMintedStatus', { value:true })
-            }else{
-              console.log('Has Not Minted!');
-            }
-            // or get socket with engine.socket
+			    /*
+				console.log('test5909');
+				
+                initWeb3().then(() => {
+					
+					firstAccount = 'test';
+					socket.emit('walletAddress', { firstAccount })
+					console.log('Passing to server.');
+					
+					if(hasMinted){
+					console.log('Has Minted!');
+					socket.emit('setMintedStatus', { value:true })
+					}else{
+					console.log('Has Not Minted!');
+					}
+				});
+				console.log('test466 '+hasMinted);	
+				*/
+
         }
     }
 })

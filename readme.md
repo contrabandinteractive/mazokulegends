@@ -1,26 +1,33 @@
-# RPG JS Game
+# Mazoku Legends
 
-This is a project template for [RPGJS](https://rpgjs.dev) apps. It lives at https://github.com/rpgjs/starter.
+## About
 
-To create a new project based on this template using [degit](https://github.com/Rich-Harris/degit):
+Mazoku Legends is a MMORPG based on Japanese mythology! It is currently a proof of concept built using RPGJS, the XRPL EVM sidechain, and the Web3.js library.
 
-```bash
-npx degit rpgjs/starter rpg-app
-cd rpg-app
-```
+It demonstrates the following:
+
+* Multiplayer capability
+* Chat functionality that lets you send XRP
+* Smart contract: The Blacksmith holds the key to the Sword NFT (ERC721) Smart Contract. 
+* Mint NFT: speak to the Blacksmith to forge your own Sword NFT! Act quick because the initial supply is 500 (now at 499!)
+* Fight the Dark Lord! If you win, you get XRP. If you lose, you send the Dark Lord some XRP.
+* The Dark Lord can only be defeated with a sword (this dApp checks if you are an owner).
+* A project built specifically for the XRPL EVM sidechain
+
+
 ## Get started
 
 Install the dependencies...
 
 ```bash
-cd rpg-app
+cd (to your directory)
 npm install
 npm run dev
 ```
 
 Navigate to [localhost:3000](http://localhost:3000). You should see your game running. Edit a file in `src`, save it, and reload the page to see your changes.
 
-> Launch in RPG mode with `RPG_TYPE=rpg npm run dev`
+
 
 ## Production
 
@@ -37,22 +44,3 @@ sudo docker build -t rpg .
 sudo docker run -p 3000:3000 -d rpg
 ```
 
-## Resources
-
-[Documentation](https://docs.rpgjs.dev)
-[Community Help](https://community.rpgjs.dev)
-
-## Credits for Sample package assets
-
-### Sounds
-
-[Davidvitas](https://www.davidvitas.com/portfolio/2016/5/12/rpg-music-pack)
-Attribution 4.0 International (CC BY 4.0)- https://creativecommons.org/licenses/by/4.0/deed.en
-
-### Graphics
-
-[Pipoya](https://pipoya.itch.io)
-
-### Icons
-
-https://game-icons.net

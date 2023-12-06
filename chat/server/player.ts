@@ -1,4 +1,4 @@
-import { RpgPlayer, RpgPlayerHooks, RpgMap, RpgWorld } from '@rpgjs/server'
+import { RpgPlayer, RpgPlayerHooks, RpgMap, RpgWorld, Components } from '@rpgjs/server'
 import truncateEthAddress from 'truncate-eth-address'
 
 function sendMessage(obj: { message: string, map: RpgMap, player?: RpgPlayer, type?: string }) {
@@ -19,16 +19,20 @@ function sendMessage(obj: { message: string, map: RpgMap, player?: RpgPlayer, ty
 
 
 export const player: RpgPlayerHooks = {
+    
     /*
     async onConnected(player: RpgPlayer){
         player.on('walletAddress',(message) => {
-            console.log(truncateEthAddress(message.firstAccount));
-            player.name = message.firstAccount;
-            player.name = truncateEthAddress(message.firstAccount);
+            console.log('Updating wallet address!!!!');
+            //console.log(truncateEthAddress(message.firstAccount));
+            //player.name = message.firstAccount;
+            //player.name = truncateEthAddress(message.firstAccount);
+            
         });
         console.log('Now connected');
     },
     */
+    
     onJoinMap(player: RpgPlayer, map: RpgMap) {
         sendMessage({
             message: `${player.name} join this map`, 
